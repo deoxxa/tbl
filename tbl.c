@@ -22,7 +22,7 @@
 
 #include "tbl.h"
 
-static void tbl_parse_integer(const struct tbl_callbacks *callbacks, struct tbl_handle *handle)
+static void tbl_parse_integer(tbl_callbacks_t *callbacks, struct tbl_handle *handle)
 {
   long long value;
   char *p, *q;
@@ -76,7 +76,7 @@ void tbl_parse_string(int (*event_fn)(void *ctx, char *value, size_t length),
   handle->ptr = endptr + len; /* jump to next token */
 }
 
-void tbl_parse_list(const struct tbl_callbacks *callbacks, struct tbl_handle *handle)
+void tbl_parse_list(tbl_callbacks_t *callbacks, struct tbl_handle *handle)
 {
   /* list start */
   if (callbacks->list_start && callbacks->list_start(handle->ctx))
@@ -91,7 +91,7 @@ void tbl_parse_list(const struct tbl_callbacks *callbacks, struct tbl_handle *ha
   handle->ptr++; /* skip 'e' */
 }
 
-void tbl_parse_dict(const struct tbl_callbacks *callbacks, struct tbl_handle *handle)
+void tbl_parse_dict(tbl_callbacks_t *callbacks, struct tbl_handle *handle)
 {
   /* dict start */
   if (callbacks->dict_start && callbacks->dict_start(handle->ctx))
@@ -109,7 +109,7 @@ void tbl_parse_dict(const struct tbl_callbacks *callbacks, struct tbl_handle *ha
   handle->ptr++; /* skip 'e' */
 }
 
-void tbl_parse_next(const struct tbl_callbacks *callbacks, struct tbl_handle *handle)
+void tbl_parse_next(tbl_callbacks_t *callbacks, struct tbl_handle *handle)
 {
   char c = *handle->ptr++;
 
@@ -132,7 +132,7 @@ void tbl_parse_next(const struct tbl_callbacks *callbacks, struct tbl_handle *ha
 }
 
 int tbl_parse(const char *buf, size_t length,
-              const struct tbl_callbacks *callbacks, void *ctx)
+              tbl_callbacks_t *callbacks, void *ctx)
 {
   jmp_buf env;
   int err;
