@@ -55,7 +55,7 @@ struct tbl_callbacks {
 typedef struct tbl_handle tbl_handle_t;
 typedef struct tbl_callbacks tbl_callbacks_t;
 
-int tbl_parse(const char *buf, size_t lenght,
+int tbl_parse(const char *buf, size_t length,
               const struct tbl_callbacks *callbacks, void *ctx);
 
 /* the callback is passed so tbl_parse_string can call either the string callback or
