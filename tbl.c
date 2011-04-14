@@ -22,25 +22,7 @@
 
 #include "tbl.h"
 
-struct tbl_handle {
-  jmp_buf    *err;
-  const char *ptr;
-  const char *end;
-  void       *ctx;
-};
-
-/* the callback is passed so parse_string can call either the string callback or
- * the dict key callback */
-static void parse_string(int (*event_fn)(void *ctx, char *value, size_t length),
-                         struct tbl_handle *handle);
-/* functions to parse container types */
-static void parse_integer(const struct tbl_callbacks *callbacks, struct tbl_handle *handle);
-static void parse_list(const struct tbl_callbacks *callbacks, struct tbl_handle *handle);
-static void parse_dict(const struct tbl_callbacks *callbacks, struct tbl_handle *handle);
-/* gets the first char of the buffer to decide which type has to be parsed */
-static void parse_next(const struct tbl_callbacks *callbacks, struct tbl_handle *handle);
-
-static void parse_integer(const struct tbl_callbacks *callbacks, struct tbl_handle *handle)
+static void tbl_parse_integer(const struct tbl_callbacks *callbacks, struct tbl_handle *handle)
 {
   long long value;
   char *p, *q;
@@ -75,7 +57,7 @@ static void parse_integer(const struct tbl_callbacks *callbacks, struct tbl_hand
   handle->ptr = q + 1; /* skip e */
 }
 
-void parse_string(int (*event_fn)(void *ctx, char *value, size_t length),
+void tbl_parse_string(int (*event_fn)(void *ctx, char *value, size_t length),
                   struct tbl_handle *handle)
 {
   size_t len;
@@ -94,14 +76,14 @@ void parse_string(int (*event_fn)(void *ctx, char *value, size_t length),
   handle->ptr = endptr + len; /* jump to next token */
 }
 
-void parse_list(const struct tbl_callbacks *callbacks, struct tbl_handle *handle)
+void tbl_parse_list(const struct tbl_callbacks *callbacks, struct tbl_handle *handle)
 {
   /* list start */
   if (callbacks->list_start && callbacks->list_start(handle->ctx))
     longjmp(*handle->err, TBL_E_CANCELED_BY_USER);
   /* entries */
   while (*handle->ptr != 'e')
-    parse_next(callbacks, handle);
+    tbl_parse_next(callbacks, handle);
   /* list end */
   if (callbacks->list_end && callbacks->list_end(handle->ctx))
     longjmp(*handle->err, TBL_E_CANCELED_BY_USER);
@@ -109,7 +91,7 @@ void parse_list(const struct tbl_callbacks *callbacks, struct tbl_handle *handle
   handle->ptr++; /* skip 'e' */
 }
 
-void parse_dict(const struct tbl_callbacks *callbacks, struct tbl_handle *handle)
+void tbl_parse_dict(const struct tbl_callbacks *callbacks, struct tbl_handle *handle)
 {
   /* dict start */
   if (callbacks->dict_start && callbacks->dict_start(handle->ctx))
@@ -117,8 +99,8 @@ void parse_dict(const struct tbl_callbacks *callbacks, struct tbl_handle *handle
 
   /* keys + entries */
   while (*handle->ptr != 'e') {
-    parse_string(callbacks->dict_key, handle);
-    parse_next(callbacks, handle);
+    tbl_parse_string(callbacks->dict_key, handle);
+    tbl_parse_next(callbacks, handle);
   }
   /* dict end */
   if (callbacks->dict_end && callbacks->dict_end(handle->ctx))
@@ -127,7 +109,7 @@ void parse_dict(const struct tbl_callbacks *callbacks, struct tbl_handle *handle
   handle->ptr++; /* skip 'e' */
 }
 
-void parse_next(const struct tbl_callbacks *callbacks, struct tbl_handle *handle)
+void tbl_parse_next(const struct tbl_callbacks *callbacks, struct tbl_handle *handle)
 {
   char c = *handle->ptr++;
 
@@ -136,15 +118,15 @@ void parse_next(const struct tbl_callbacks *callbacks, struct tbl_handle *handle
 
   /* get type of next entry */
   if (c == 'i')
-    parse_integer(callbacks, handle);
+    tbl_parse_integer(callbacks, handle);
   else if (isdigit(c) != 0) {
     handle->ptr--; /* string has no prefix like i d or l to be skipped */
-    parse_string(callbacks->string, handle);
+    tbl_parse_string(callbacks->string, handle);
   }
   else if (c == 'l')
-    parse_list(callbacks, handle);
+    tbl_parse_list(callbacks, handle);
   else if (c == 'd')
-    parse_dict(callbacks, handle);
+    tbl_parse_dict(callbacks, handle);
   else
     longjmp(*handle->err, TBL_E_INVALID_DATA);
 }
@@ -161,8 +143,37 @@ int tbl_parse(const char *buf, size_t lenght,
 
   err = setjmp(env);
   if (err == TBL_E_NONE && handle.ptr < handle.end)
-    parse_next(callbacks, &handle);
+    tbl_parse_next(callbacks, &handle);
 
   return err;
 }
 
+int tbl_gen_integer(tbl_handle_t *handle, long value)
+{
+  return 0;
+}
+
+int tbl_gen_string(tbl_handle_t *handle, const char *str, size_t len)
+{
+  return 0;
+}
+
+int tbl_gen_dict_open(tbl_handle_t *handle)
+{
+  return 0;
+}
+
+int tbl_gen_dict_close(tbl_handle_t *handle)
+{
+  return 0;
+}
+
+int tbl_gen_list_open(tbl_handle_t *handle)
+{
+  return 0;
+}
+
+int tbl_gen_list_close(tbl_handle_t *handle)
+{
+  return 0;
+}
