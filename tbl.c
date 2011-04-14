@@ -57,8 +57,7 @@ static void tbl_parse_integer(tbl_callbacks_t *callbacks, tbl_handle_t *handle)
   handle->ptr = q + 1; /* skip e */
 }
 
-void tbl_parse_string(int (*event_fn)(void *ctx, char *value, size_t length),
-                  tbl_handle_t *handle)
+void tbl_parse_string(int (*event_fn)(void *ctx, char *value, size_t length), tbl_handle_t *handle)
 {
   size_t len;
   char *ptr, *endptr;
@@ -131,8 +130,7 @@ void tbl_parse_next(tbl_callbacks_t *callbacks, tbl_handle_t *handle)
     longjmp(*handle->err, TBL_E_INVALID_DATA);
 }
 
-int tbl_parse(const char *buf, size_t length,
-              tbl_callbacks_t *callbacks, void *ctx)
+int tbl_parse(const char *buf, size_t length, tbl_callbacks_t *callbacks, void *ctx)
 {
   jmp_buf env;
   int err;
