@@ -52,22 +52,20 @@ struct tbl_callbacks {
   int (*dict_end)  (void *ctx);
 };
 
-typedef const struct tbl_handle tbl_handle_t;
+typedef struct tbl_handle tbl_handle_t;
 typedef const struct tbl_callbacks tbl_callbacks_t;
 
-int tbl_parse(const char *buf, size_t length,
-              tbl_callbacks_t *callbacks, void *ctx);
+int tbl_parse(const char *buf, size_t length, tbl_callbacks_t *callbacks, void *ctx);
 
 /* the callback is passed so tbl_parse_string can call either the string callback or
  * the dict key callback */
-static void tbl_parse_string(int (*event_fn)(void *ctx, char *value, size_t length),
-                         struct tbl_handle *handle);
+static void tbl_parse_string(int (*event_fn)(void *ctx, char *value, size_t length), tbl_handle_t *handle);
 /* functions to parse container types */
-static void tbl_parse_integer(tbl_callbacks_t *callbacks, struct tbl_handle *handle);
-static void tbl_parse_list(tbl_callbacks_t *callbacks, struct tbl_handle *handle);
-static void tbl_parse_dict(tbl_callbacks_t *callbacks, struct tbl_handle *handle);
+static void tbl_parse_integer(tbl_callbacks_t *callbacks, tbl_handle_t *handle);
+static void tbl_parse_list(tbl_callbacks_t *callbacks, tbl_handle_t *handle);
+static void tbl_parse_dict(tbl_callbacks_t *callbacks, tbl_handle_t *handle);
 /* gets the first char of the buffer to decide which type has to be parsed */
-static void tbl_parse_next(tbl_callbacks_t *callbacks, struct tbl_handle *handle);
+static void tbl_parse_next(tbl_callbacks_t *callbacks, tbl_handle_t *handle);
 
 /* only prototypes; nothing of this is implemented yet */
 int tbl_gen_integer(tbl_handle_t *handle, long value);
