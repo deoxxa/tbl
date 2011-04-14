@@ -136,7 +136,7 @@ int tbl_parse(const char *buf, size_t length,
 {
   jmp_buf env;
   int err;
-  struct tbl_handle handle = { &env, buf, buf + length, ctx };
+  tbl_handle_t handle = { &env, buf, buf + length, ctx };
 
   if (!callbacks)
     return TBL_E_NO_CALLBACKS;
